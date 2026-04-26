@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kutsal Metinler Arşivi — Kuran · İncil · Tevrat</title>
+<meta name="description" content="Kuran-ı Kerim, İncil ve Tevrat'ı çok dilli mealler ve çevirilerle okuma arşivi.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Amiri:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="app">
+
+<div class="hdr">
+  <div class="hdr-inner">
+    <div class="hdr-top">
+      <div class="hdr-title-wrap">
+        <div class="hdr-title" id="hdr-title">Kutsal Metinler Arşivi</div>
+        <div class="hdr-sub" id="hdr-sub">Kuran · İncil · Tevrat — çok dilli mealler ve çeviriler</div>
+      </div>
+      <div class="hdr-tools">
+        <select class="lang-sel" id="lang-sel" onchange="setLang(this.value)" aria-label="Language">
+          <option value="tr">🇹🇷 Türkçe</option>
+          <option value="en">🇬🇧 English</option>
+          <option value="ar">🇸🇦 العربية</option>
+          <option value="ru">🇷🇺 Русский</option>
+        </select>
+      </div>
+    </div>
+  </div>
+  <div class="tabs">
+    <button class="tab-btn ak" id="tab-kuran" onclick="switchTab('kuran')">☽ Kuran-ı Kerim</button>
+    <button class="tab-btn" id="tab-incil" onclick="switchTab('incil')">✝ İncil</button>
+    <button class="tab-btn" id="tab-tevrat" onclick="switchTab('tevrat')">✡ Tevrat</button>
+  </div>
+</div>
+
+<div class="body">
+  <div class="sidebar" id="sidebar">
+    <div class="sb-hdr">
+      <input class="sb-search" type="text" id="sb-search" placeholder="Ara…" oninput="filterList()">
+    </div>
+    <div class="sb-list" id="sb-list"></div>
+  </div>
+  <div class="main-wrap">
+    <div class="ctrl-bar" id="ctrl-bar"></div>
+    <div class="main" id="main">
+      <div class="loading">Yükleniyor…</div>
+    </div>
+  </div>
+</div>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <span class="footer-tag" id="footer-tag">Onur İlgın · 2026 · <a href="mailto:onur.ilgin.mail@gmail.com">onur.ilgin.mail@gmail.com</a> · <a href="#" id="sources-link" onclick="event.preventDefault();openSources()">Kaynaklar</a></span>
+    </div>
+  </div>
+</footer>
+
+<!-- Kaynaklar modalı -->
+<div class="modal-bg" id="sources-modal" onclick="if(event.target===this)closeSources()">
+  <div class="modal">
+    <button class="modal-close" onclick="closeSources()" aria-label="Close">×</button>
+    <div class="modal-content" id="sources-content"></div>
+  </div>
+</div>
+
+</div>
+
+<!-- Türkçe YTC — Yorumsuz Çeviri (eBible.org, CC-BY-ND 4.0) -->
+<script src="data/tevrat-tr-ytc.js"></script>
+<script src="data/incil-tr-ytc.js"></script>
+<!-- Ana uygulama -->
+<script src="app.js"></script>
+<script>
+  /* Dil seçici init — kayıtlı dili göster */
+  document.getElementById('lang-sel').value = getLang();
+  
+  /* Footer'daki "Kaynaklar" linkinin metni dile göre güncellenir */
+  const SOURCES_LABEL = {tr:"Kaynaklar", en:"Sources", ar:"المصادر", ru:"Источники"};
+  function updateSourcesLabel(){
+    const el=document.getElementById('sources-link');
+    if(el) el.textContent = SOURCES_LABEL[getLang()] || SOURCES_LABEL.tr;
+  }
+  updateSourcesLabel();
+  
+  /* Dil değişince footer linkini de güncelle */
+  const _origSetLang = setLang;
+  setLang = function(code){
+    _origSetLang(code);
+    updateSourcesLabel();
+  };
+  
+  /* Kaynaklar modal içeriği — 4 dilde */
+  const SOURCES_HTML = {
+    tr: `
+      <h2>Kaynaklar</h2>
+      <p class="sources-intro">Bu sitede kullanılan tüm kutsal metinler kamu malı veya açık lisanslı kaynaklardan elde edilmiştir. Hiçbir telifli yayın kullanılmamıştır.</p>
+      
+      <h3>Kuran-ı Kerim</h3>
+      <ul>
+        <li><strong>Türkçe — Elmalılı Hamdi Yazır</strong> (1935) · Kamu malı</li>
+        <li><strong>İngilizce — Marmaduke Pickthall</strong> (1930) · Kamu malı</li>
+        <li><strong>İngilizce — Abdullah Yusuf Ali</strong> (1934) · Kamu malı</li>
+        <li><strong>Arapça orijinal & API:</strong> <a href="https://alquran.cloud" target="_blank" rel="noopener">alquran.cloud</a></li>
+      </ul>
+      
+      <h3>İncil & Tevrat — Türkçe</h3>
+      <ul>
+        <li><strong>Yorumsuz Türkçe Çeviri (YTC)</strong> · © 2023-2025 İsmail Serinken / <a href="https://ebible.org/turytc/" target="_blank" rel="noopener">eBible.org</a> · CC-BY-ND 4.0</li>
+      </ul>
+      
+      <h3>İncil & Tevrat — Diğer Diller</h3>
+      <ul>
+        <li><strong>İbranice</strong> · Westminster Leningrad Codex · Kamu malı</li>
+        <li><strong>Yunanca</strong> · Septuagint (LXX), Textus Receptus (1624), Tischendorf (1869) · Kamu malı</li>
+        <li><strong>Latince</strong> · Vulgata (4. yüzyıl) · Kamu malı</li>
+        <li><strong>İngilizce</strong> · KJV (1611), WEB, ASV (1901), YLT (1898), Douay-Rheims, Geneva (1599), Berean Standard (CC0)</li>
+        <li><strong>Almanca</strong> · Luther (1912), Elberfelder (1871), Menge-Bibel · Kamu malı</li>
+        <li><strong>Fransızca</strong> · Darby (1890) · Kamu malı</li>
+        <li><strong>Rusça</strong> · Sinodal (1876) · Kamu malı</li>
+        <li><strong>Arapça</strong> · Smith-Van Dyke (1865) · Kamu malı</li>
+        <li><strong>Hollandaca</strong> · Statenvertaling (1619) · Kamu malı</li>
+        <li><strong>Lehçe</strong> · Biblia gdańska (1881) · Kamu malı</li>
+        <li><strong>Macarca</strong> · Karoli (1908) · Kamu malı</li>
+        <li><strong>Çince</strong> · Peking Committee Bible (1899) · Kamu malı</li>
+        <li><strong>Norveççe</strong> · DNB (1930) · Kamu malı</li>
+      </ul>
+      
+      <h3>Veri Kaynakları</h3>
+      <ul>
+        <li><strong><a href="https://alquran.cloud" target="_blank" rel="noopener">alquran.cloud</a></strong> · Kuran metni ve mealler (API)</li>
+        <li><strong><a href="https://bolls.life" target="_blank" rel="noopener">bolls.life</a></strong> · Diğer dillerdeki İncil/Tevrat çevirileri</li>
+        <li><strong><a href="https://ebible.org" target="_blank" rel="noopener">eBible.org</a></strong> · Türkçe YTC çevirisi</li>
+      </ul>
+      
+      <p class="modal-footer-note">Bir telif sorunu fark ederseniz lütfen bana ulaşın: <a href="mailto:onur.ilgin.mail@gmail.com">onur.ilgin.mail@gmail.com</a></p>
+    `,
+    en: `
+      <h2>Sources</h2>
+      <p class="sources-intro">All sacred texts presented on this site are obtained from public domain or openly licensed sources. No copyrighted publications are used.</p>
+      
+      <h3>The Holy Quran</h3>
+      <ul>
+        <li><strong>Turkish — Elmalılı Hamdi Yazır</strong> (1935) · Public domain</li>
+        <li><strong>English — Marmaduke Pickthall</strong> (1930) · Public domain</li>
+        <li><strong>English — Abdullah Yusuf Ali</strong> (1934) · Public domain</li>
+        <li><strong>Arabic original & API:</strong> <a href="https://alquran.cloud" target="_blank" rel="noopener">alquran.cloud</a></li>
+      </ul>
+      
+      <h3>Bible — Turkish</h3>
+      <ul>
+        <li><strong>Yorumsuz Türkçe Çeviri (YTC)</strong> · © 2023-2025 İsmail Serinken / <a href="https://ebible.org/turytc/" target="_blank" rel="noopener">eBible.org</a> · CC-BY-ND 4.0</li>
+      </ul>
+      
+      <h3>Bible — Other Languages</h3>
+      <ul>
+        <li><strong>Hebrew</strong> · Westminster Leningrad Codex · Public domain</li>
+        <li><strong>Greek</strong> · Septuagint (LXX), Textus Receptus (1624), Tischendorf (1869) · Public domain</li>
+        <li><strong>Latin</strong> · Vulgate (4th century) · Public domain</li>
+        <li><strong>English</strong> · KJV (1611), WEB, ASV (1901), YLT (1898), Douay-Rheims, Geneva (1599), Berean Standard (CC0)</li>
+        <li><strong>German</strong> · Luther (1912), Elberfelder (1871), Menge · Public domain</li>
+        <li><strong>French</strong> · Darby (1890) · Public domain</li>
+        <li><strong>Russian</strong> · Synodal (1876) · Public domain</li>
+        <li><strong>Arabic</strong> · Smith-Van Dyke (1865) · Public domain</li>
+        <li><strong>Dutch</strong> · Statenvertaling (1619) · Public domain</li>
+        <li><strong>Polish</strong> · Biblia gdańska (1881) · Public domain</li>
+        <li><strong>Hungarian</strong> · Károli (1908) · Public domain</li>
+        <li><strong>Chinese</strong> · Peking Committee Bible (1899) · Public domain</li>
+        <li><strong>Norwegian</strong> · DNB (1930) · Public domain</li>
+      </ul>
+      
+      <h3>Data Sources</h3>
+      <ul>
+        <li><strong><a href="https://alquran.cloud" target="_blank" rel="noopener">alquran.cloud</a></strong> · Quran text and translations (API)</li>
+        <li><strong><a href="https://bolls.life" target="_blank" rel="noopener">bolls.life</a></strong> · Bible translations in other languages</li>
+        <li><strong><a href="https://ebible.org" target="_blank" rel="noopener">eBible.org</a></strong> · Turkish YTC translation</li>
+      </ul>
+      
+      <p class="modal-footer-note">If you notice a copyright issue, please contact me: <a href="mailto:onur.ilgin.mail@gmail.com">onur.ilgin.mail@gmail.com</a></p>
+    `,
+    ar: `
+      <h2>المصادر</h2>
+      <p class="sources-intro">جميع النصوص المقدسة المعروضة في هذا الموقع مأخوذة من مصادر ملكية عامة أو مرخصة بشكل مفتوح. لم تُستخدم أي منشورات محمية بحقوق الطبع والنشر.</p>
+      
+      <h3>القرآن الكريم</h3>
+      <ul>
+        <li><strong>التركية — المالي حمدي يازر</strong> (1935) · ملكية عامة</li>
+        <li><strong>الإنجليزية — مارمادوك بيكثل</strong> (1930) · ملكية عامة</li>
+        <li><strong>الإنجليزية — عبد الله يوسف علي</strong> (1934) · ملكية عامة</li>
+        <li><strong>النص العربي والواجهة:</strong> <a href="https://alquran.cloud" target="_blank" rel="noopener">alquran.cloud</a></li>
+      </ul>
+      
+      <h3>الكتاب المقدس — اللغة التركية</h3>
+      <ul>
+        <li><strong>الترجمة التركية الموضوعية (YTC)</strong> · © 2023-2025 إسماعيل سيرينكين / <a href="https://ebible.org/turytc/" target="_blank" rel="noopener">eBible.org</a> · CC-BY-ND 4.0</li>
+      </ul>
+      
+      <h3>الكتاب المقدس — لغات أخرى</h3>
+      <ul>
+        <li><strong>العبرية</strong> · مخطوطة لينينغراد ويستمنستر · ملكية عامة</li>
+        <li><strong>اليونانية</strong> · السبعينية، النص المستلم (1624)، تيشندورف (1869) · ملكية عامة</li>
+        <li><strong>اللاتينية</strong> · الفولغاتا (القرن الرابع) · ملكية عامة</li>
+        <li><strong>الإنجليزية</strong> · KJV (1611)، WEB، ASV (1901)، YLT (1898)، Douay-Rheims، Geneva (1599)، Berean (CC0)</li>
+        <li><strong>الألمانية</strong> · لوثر (1912)، إلبرفيلدر (1871) · ملكية عامة</li>
+        <li><strong>الفرنسية</strong> · داربي (1890) · ملكية عامة</li>
+        <li><strong>الروسية</strong> · المجمع المقدس (1876) · ملكية عامة</li>
+        <li><strong>العربية</strong> · سميث-فان دايك (1865) · ملكية عامة</li>
+        <li><strong>الهولندية، البولندية، المجرية، الصينية، النرويجية</strong> · جميعها ترجمات تاريخية ضمن الملكية العامة</li>
+      </ul>
+      
+      <h3>مصادر البيانات</h3>
+      <ul>
+        <li><a href="https://alquran.cloud" target="_blank" rel="noopener">alquran.cloud</a> · نص القرآن وترجماته</li>
+        <li><a href="https://bolls.life" target="_blank" rel="noopener">bolls.life</a> · ترجمات الكتاب المقدس</li>
+        <li><a href="https://ebible.org" target="_blank" rel="noopener">eBible.org</a> · الترجمة التركية YTC</li>
+      </ul>
+      
+      <p class="modal-footer-note">إذا لاحظت مشكلة في حقوق النشر، يرجى التواصل: <a href="mailto:onur.ilgin.mail@gmail.com">onur.ilgin.mail@gmail.com</a></p>
+    `,
+    ru: `
+      <h2>Источники</h2>
+      <p class="sources-intro">Все священные тексты, представленные на этом сайте, получены из источников в общественном достоянии или с открытыми лицензиями. Никакие защищённые авторским правом издания не используются.</p>
+      
+      <h3>Священный Коран</h3>
+      <ul>
+        <li><strong>Турецкий — Эльмалы Хамди Языр</strong> (1935) · Общественное достояние</li>
+        <li><strong>Английский — Мармадюк Пиктхолл</strong> (1930) · Общественное достояние</li>
+        <li><strong>Английский — Абдулла Юсуф Али</strong> (1934) · Общественное достояние</li>
+        <li><strong>Арабский оригинал и API:</strong> <a href="https://alquran.cloud" target="_blank" rel="noopener">alquran.cloud</a></li>
+      </ul>
+      
+      <h3>Библия — Турецкий</h3>
+      <ul>
+        <li><strong>Турецкий перевод без комментариев (YTC)</strong> · © 2023-2025 Исмаил Серинкен / <a href="https://ebible.org/turytc/" target="_blank" rel="noopener">eBible.org</a> · CC-BY-ND 4.0</li>
+      </ul>
+      
+      <h3>Библия — Другие языки</h3>
+      <ul>
+        <li><strong>Иврит</strong> · Ленинградский кодекс · Общественное достояние</li>
+        <li><strong>Греческий</strong> · Септуагинта, Textus Receptus (1624), Тишендорф (1869) · Общественное достояние</li>
+        <li><strong>Латинский</strong> · Вульгата (IV век) · Общественное достояние</li>
+        <li><strong>Английский</strong> · KJV (1611), WEB, ASV (1901), YLT (1898), Douay-Rheims, Geneva (1599), Berean (CC0)</li>
+        <li><strong>Немецкий</strong> · Лютер (1912), Эльберфельдер (1871), Менге · Общественное достояние</li>
+        <li><strong>Французский</strong> · Дарби (1890) · Общественное достояние</li>
+        <li><strong>Русский</strong> · Синодальный (1876) · Общественное достояние</li>
+        <li><strong>Арабский</strong> · Смит-Ван Дайк (1865) · Общественное достояние</li>
+        <li><strong>Голландский, польский, венгерский, китайский, норвежский</strong> · все исторические переводы в общественном достоянии</li>
+      </ul>
+      
+      <h3>Источники данных</h3>
+      <ul>
+        <li><a href="https://alquran.cloud" target="_blank" rel="noopener">alquran.cloud</a> · Текст Корана и переводы</li>
+        <li><a href="https://bolls.life" target="_blank" rel="noopener">bolls.life</a> · Переводы Библии</li>
+        <li><a href="https://ebible.org" target="_blank" rel="noopener">eBible.org</a> · Турецкий перевод YTC</li>
+      </ul>
+      
+      <p class="modal-footer-note">Если вы заметили проблему с авторскими правами, пожалуйста, свяжитесь со мной: <a href="mailto:onur.ilgin.mail@gmail.com">onur.ilgin.mail@gmail.com</a></p>
+    `
+  };
+  
+  function openSources(){
+    const lang = getLang();
+    document.getElementById('sources-content').innerHTML = SOURCES_HTML[lang] || SOURCES_HTML.tr;
+    document.getElementById('sources-modal').classList.add('open');
+  }
+  function closeSources(){
+    document.getElementById('sources-modal').classList.remove('open');
+  }
+  document.addEventListener('keydown', e => { if(e.key==='Escape') closeSources(); });
+</script>
+</body>
+</html>
