@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /data/bible/
+
+Sitemap: https://kutsalmetinler.com/sitemap.xml
