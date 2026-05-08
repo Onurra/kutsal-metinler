@@ -3,13 +3,22 @@
         xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://kutsalmetinler.com/</loc>
-    <lastmod>2026-04-26</lastmod>
-    <changefreq>monthly</changefreq>
+    <lastmod>2026-05-08</lastmod>
+    <changefreq>weekly</changefreq>
     <priority>1.0</priority>
     <xhtml:link rel="alternate" hreflang="tr" href="https://kutsalmetinler.com/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://kutsalmetinler.com/"/>
     <xhtml:link rel="alternate" hreflang="ar" href="https://kutsalmetinler.com/"/>
     <xhtml:link rel="alternate" hreflang="ru" href="https://kutsalmetinler.com/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://kutsalmetinler.com/"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://kutsalmetinler.com/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://kutsalmetinler.com/"/>
+    <xhtml:link rel="alternate" hreflang="nl" href="https://kutsalmetinler.com/"/>
+    <xhtml:link rel="alternate" hreflang="pl" href="https://kutsalmetinler.com/"/>
+    <xhtml:link rel="alternate" hreflang="hu" href="https://kutsalmetinler.com/"/>
+    <xhtml:link rel="alternate" hreflang="he" href="https://kutsalmetinler.com/"/>
+    <xhtml:link rel="alternate" hreflang="el" href="https://kutsalmetinler.com/"/>
+    <xhtml:link rel="alternate" hreflang="la" href="https://kutsalmetinler.com/"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://kutsalmetinler.com/"/>
   </url>
 </urlset>
