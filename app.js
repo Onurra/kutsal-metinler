@@ -30,6 +30,11 @@ const I18N = {
     error_book_not_found:"Bu kitap gömülü veride yok",
     error_chapter_not_found:"Bu bölüm bulunamadı",
     error_translation_not_found:"Bu çeviride bu bölüm bulunamadı.",
+    mark_read:"Okundu olarak işaretle",
+    mark_unread:"Okunmadı olarak işaretle",
+    read_count:"okundu",
+    reset_progress:"İlerlemeyi sıfırla",
+    reset_confirm:"Bu sekmedeki tüm okuma işaretleri silinecek. Devam edilsin mi?",
   },
   en: {
     title:"Sacred Texts Archive",
@@ -54,6 +59,11 @@ const I18N = {
     error_book_not_found:"This book is not in embedded data",
     error_chapter_not_found:"Chapter not found",
     error_translation_not_found:"This chapter is not available in this translation.",
+    mark_read:"Mark as read",
+    mark_unread:"Mark as unread",
+    read_count:"read",
+    reset_progress:"Reset progress",
+    reset_confirm:"This will clear all read marks in this tab. Continue?",
   },
   ar: {
     title:"أرشيف النصوص المقدسة",
@@ -78,6 +88,11 @@ const I18N = {
     error_book_not_found:"هذا الكتاب غير موجود في البيانات",
     error_chapter_not_found:"لم يتم العثور على الفصل",
     error_translation_not_found:"هذا الفصل غير متوفر في هذه الترجمة.",
+    mark_read:"وضع علامة كمقروء",
+    mark_unread:"وضع علامة كغير مقروء",
+    read_count:"مقروء",
+    reset_progress:"إعادة تعيين التقدم",
+    reset_confirm:"سيؤدي هذا إلى حذف جميع علامات القراءة في هذا القسم. هل تريد المتابعة؟",
   },
   ru: {
     title:"Архив Священных Текстов",
@@ -102,6 +117,11 @@ const I18N = {
     error_book_not_found:"Эта книга не во встроенных данных",
     error_chapter_not_found:"Глава не найдена",
     error_translation_not_found:"Эта глава недоступна в данном переводе.",
+    mark_read:"Отметить как прочитанное",
+    mark_unread:"Отметить как непрочитанное",
+    read_count:"прочитано",
+    reset_progress:"Сбросить прогресс",
+    reset_confirm:"Это удалит все отметки о прочтении в этой вкладке. Продолжить?",
   },
 };
 
@@ -185,6 +205,42 @@ const SURAH_NAMES = {
 
 /* Geriye uyumluluk için eski isim */
 const SURAH_TR = SURAH_NAMES.tr;
+
+/* ========== OKUMA TAKİBİ (localStorage) ========== */
+/* Yapı: { kuran: ["1","5","18"], incil: ["matt","john"], tevrat: ["gen","exo"] } */
+function getRead(){
+  try { return JSON.parse(localStorage.getItem("readMarks") || '{"kuran":[],"incil":[],"tevrat":[]}'); }
+  catch(e){ return {kuran:[],incil:[],tevrat:[]}; }
+}
+function saveRead(d){ localStorage.setItem("readMarks", JSON.stringify(d)); }
+function isRead(tab, key){
+  const d = getRead();
+  return (d[tab]||[]).includes(String(key));
+}
+function toggleRead(tab, key){
+  const d = getRead();
+  const k = String(key);
+  const arr = d[tab] = d[tab] || [];
+  const i = arr.indexOf(k);
+  if(i>=0) arr.splice(i,1);
+  else arr.push(k);
+  saveRead(d);
+}
+function readCount(tab){
+  const d = getRead();
+  return (d[tab]||[]).length;
+}
+function totalCount(tab){
+  if(tab==="kuran") return 114;
+  if(tab==="incil") return INCIL.length;
+  if(tab==="tevrat") return TEVRAT.length;
+  return 0;
+}
+function resetTab(tab){
+  const d = getRead();
+  d[tab] = [];
+  saveRead(d);
+}
 
 /* Sure adı ve "X Suresi" alt yazısı UI diline göre */
 function surahDisplayName(s){
@@ -461,6 +517,15 @@ function renderSB(){
   const el=document.getElementById("sb-list");
   const q=S.q.toLowerCase();
   const a=ac(S.tab);
+  
+  /* Sidebar başı: progress sayacı + sıfırla butonu */
+  const total = totalCount(S.tab);
+  const done = readCount(S.tab);
+  const headerHTML = `<div class="sb-progress">
+    <span class="sb-prog-text">✓ ${done}/${total} ${t("read_count")}</span>
+    ${done>0?`<button class="sb-reset-btn" onclick="resetReadTab('${S.tab}')" title="${t("reset_progress")}">↻</button>`:""}
+  </div>`;
+  
   if(S.tab==="kuran"){
     const items=S.surahs.filter(s=>{
       if(!q) return true;
@@ -470,11 +535,13 @@ function renderSB(){
       const idx=s.number-1;
       return Object.values(SURAH_NAMES).some(arr=>(arr[idx]||"").toLowerCase().includes(q));
     });
-    el.innerHTML=items.map(s=>{
+    el.innerHTML=headerHTML+items.map(s=>{
       const sel=S.sel===s.number;
-      return `<div class="sb-item ${sel?"sel-k":""}" onclick="selSurah(${s.number})">
+      const read=isRead("kuran", s.number);
+      return `<div class="sb-item ${sel?"sel-k":""} ${read?"sb-read":""}" onclick="selSurah(${s.number})">
         <div class="sb-num ${sel?"sn-k":"sn-neutral"}">${s.number}</div>
-        <div><div class="sb-name">${surahDisplayName(s)}</div><div class="sb-meta">${s.name} · ${s.numberOfAyahs} ${t("verses").toLowerCase()}</div></div>
+        <div class="sb-body"><div class="sb-name">${surahDisplayName(s)}</div><div class="sb-meta">${s.name} · ${s.numberOfAyahs} ${t("verses").toLowerCase()}</div></div>
+        <input type="checkbox" class="sb-check" ${read?"checked":""} onclick="event.stopPropagation();markRead('kuran',${s.number})" title="${read?t("mark_unread"):t("mark_read")}">
       </div>`;
     }).join("");
   } else {
@@ -484,14 +551,29 @@ function renderSB(){
       if(b.names) return Object.values(b.names).some(n=>n.toLowerCase().includes(q));
       return (b.tr||"").toLowerCase().includes(q);
     });
-    el.innerHTML=items.map((b,i)=>{
+    el.innerHTML=headerHTML+items.map((b,i)=>{
       const sel=S.book&&S.book.id===b.id;
+      const read=isRead(S.tab, b.id);
       const chips=sel?Array.from({length:b.ch},(_,j)=>j+1).map(n=>`<button class="ch-btn ${S.chapter===n?"c"+a:""}" onclick="selCh(${n})">${n}</button>`).join(""):"";
-      return `<div class="sb-item ${sel?"sel-"+a:""}" onclick="selBook('${b.id}')">
+      return `<div class="sb-item ${sel?"sel-"+a:""} ${read?"sb-read":""}" onclick="selBook('${b.id}')">
         <div class="sb-num ${sel?"sn-"+a:"sn-neutral"}">${i+1}</div>
-        <div><div class="sb-name">${bookName(b)}</div><div class="sb-meta">${b.ch} ${t("chapter_count")}</div></div>
+        <div class="sb-body"><div class="sb-name">${bookName(b)}</div><div class="sb-meta">${b.ch} ${t("chapter_count")}</div></div>
+        <input type="checkbox" class="sb-check" ${read?"checked":""} onclick="event.stopPropagation();markRead('${S.tab}','${b.id}')" title="${read?t("mark_unread"):t("mark_read")}">
       </div>${sel?`<div class="ch-grid">${chips}</div>`:""}`;
     }).join("");
+  }
+}
+
+/* Tik kutusu tıklanınca */
+function markRead(tab, key){
+  toggleRead(tab, key);
+  renderSB();
+}
+/* Sıfırla butonu tıklanınca */
+function resetReadTab(tab){
+  if(confirm(t("reset_confirm"))){
+    resetTab(tab);
+    renderSB();
   }
 }
 

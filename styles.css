@@ -40,6 +40,19 @@ html,body{height:100%;background:var(--parchment)}
 .sb-item.sel-k{border-left-color:var(--gold);background:rgba(184,147,58,.12)}
 .sb-item.sel-i{border-left-color:var(--navy-light);background:var(--navy-pale)}
 .sb-item.sel-t{border-left-color:var(--forest-light);background:var(--forest-pale)}
+.sb-body{flex:1;min-width:0}
+
+/* Okuma takibi */
+.sb-progress{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-bottom:1px solid rgba(184,147,58,.2);background:rgba(184,147,58,.05);font-size:11px;color:#7A5F2A;font-family:'Cinzel',serif;letter-spacing:.5px}
+.sb-prog-text{font-weight:500}
+.sb-reset-btn{background:transparent;border:1px solid rgba(184,147,58,.4);color:#7A5F2A;cursor:pointer;width:22px;height:22px;border-radius:50%;font-size:13px;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.sb-reset-btn:hover{background:var(--gold);color:#fff;border-color:var(--gold)}
+.sb-check{cursor:pointer;width:16px;height:16px;margin-top:4px;accent-color:#2D8A54;flex-shrink:0;opacity:.4;transition:opacity .15s}
+.sb-item:hover .sb-check{opacity:1}
+.sb-check:checked{opacity:1}
+.sb-item.sb-read{opacity:.65}
+.sb-item.sb-read .sb-name{text-decoration:line-through;text-decoration-color:rgba(45,138,84,.4);text-decoration-thickness:1px}
+.sb-item.sb-read .sb-num{border-color:#2D8A54;color:#2D8A54;background:rgba(45,138,84,.08)}
 .sb-num{width:26px;height:26px;min-width:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Cinzel',serif;font-size:10px;font-weight:600;flex-shrink:0;margin-top:1px;border:1.5px solid}
 .sn-neutral{border-color:rgba(0,0,0,.2);color:rgba(0,0,0,.4);background:transparent}
 .sn-k{border-color:var(--gold);color:var(--gold);background:rgba(184,147,58,.1)}
