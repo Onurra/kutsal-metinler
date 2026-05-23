@@ -3,6 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>
+  /* Flicker önlemek için tema en başta uygulanır */
+  (function(){
+    try{ var t=localStorage.getItem("theme")||"light";
+         document.documentElement.setAttribute("data-theme",t); }catch(e){}
+  })();
+</script>
 
 <!-- Temel SEO -->
 <meta name="google-site-verification" content="ACnhnOJz5vaFB_wrBzQ2Cl_WLdPeEhofhyHEPojQYFI" />
@@ -140,6 +147,7 @@ sacred texts archive, religious texts online, comparative religion, abrahamic re
         <div class="hdr-sub" id="hdr-sub">Kuran · İncil · Tevrat — çok dilli mealler ve çeviriler</div>
       </div>
       <div class="hdr-tools">
+        <button class="theme-btn" id="theme-btn" onclick="toggleTheme()" aria-label="Theme" title="Tema">🌙</button>
         <select class="lang-sel" id="lang-sel" onchange="setLang(this.value)" aria-label="Language">
           <option value="tr">🇹🇷 Türkçe</option>
           <option value="en">🇬🇧 English</option>
@@ -195,6 +203,18 @@ sacred texts archive, religious texts online, comparative religion, abrahamic re
 <!-- Ana uygulama -->
 <script src="app.js"></script>
 <script>
+  /* === TEMA YÖNETİMİ === */
+  function getTheme(){ return localStorage.getItem("theme") || "light"; }
+  function setTheme(t){
+    localStorage.setItem("theme", t);
+    document.documentElement.setAttribute("data-theme", t);
+    const btn = document.getElementById("theme-btn");
+    if(btn) btn.textContent = t==="dark" ? "☀️" : "🌙";
+  }
+  function toggleTheme(){ setTheme(getTheme()==="dark" ? "light" : "dark"); }
+  /* Sayfa yüklenirken hemen uygula (flicker olmasın) ve buton emojisini eşle */
+  setTheme(getTheme());
+  
   /* Dil seçici init — kayıtlı dili göster */
   document.getElementById('lang-sel').value = getLang();
   
